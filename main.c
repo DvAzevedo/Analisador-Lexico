@@ -1,6 +1,8 @@
 /* main.c */
 void main(void){
   int a;
+  int davi;
+  pjpo
 
   a = 10;  /* Testando
               comentário
@@ -9,3 +11,4 @@ void main(void){
     a = (4 + 5) * 3;
   }
 }
+.
