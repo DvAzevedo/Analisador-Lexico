@@ -24,7 +24,11 @@ str\"([^"\\]|\\.)*\"
     Symbol symbol_table[100];
     int symbol_count = 0;
 
-    void add_to_symbol_table(const char *name, int line) {
+   void add_to_symbol_table(const char *name, int line) {
+        if (symbol_count >= 100) {
+            fprintf(stderr, "Erro: Tabela de símbolos cheia.\n");
+            return;
+        }
         for (int i = 0; i < symbol_count; i++) {
             if (strcmp(symbol_table[i].name, name) == 0) {
                 return;
@@ -36,6 +40,7 @@ str\"([^"\\]|\\.)*\"
 
         symbol_count++;
     }
+
     int getId (const char *name){
         for (int i = 0; i < symbol_count; i++) {
             if (strcmp(symbol_table[i].name, name) == 0) {
@@ -46,10 +51,10 @@ str\"([^"\\]|\\.)*\"
     }
 
     void print_symbol_table() {
-        printf("\nSymbol Table:\n");
-        printf("--------------\n");
+        fprintf(out, "\nSymbol Table:\n");
+        fprintf(out, "--------------\n");
         for (int i = 0; i < symbol_count; i++) {
-            printf("Name: %s, Id: %d\n", symbol_table[i].name, symbol_table[i].id);
+            fprintf(out, "Name: %s, Id: %d\n", symbol_table[i].name, symbol_table[i].id);
         }
     }
 %}
@@ -89,18 +94,23 @@ else|if|int|return|void|while {fprintf(out,"<%s>\n" ,yytext);}
 
 int yywrap();
 
-int main(int argc, char *argv[]){
-    FILE *arquivo = fopen(argv[1],"r");
+int main(int argc, char *argv[]) {
+    FILE *arquivo = fopen(argv[1], "r");
     if (!arquivo) {
-      cout << "Arquivo inexistente" << endl;
-      return -1;
+        cout << "Arquivo inexistente" << endl;
+        return -1;
     }
     yyin = arquivo;
-    out = fopen(argv[2],"w");
+    out = fopen(argv[2], "w");
+    if (!out) {
+        cout << "Erro ao abrir arquivo de saída" << endl;
+        return -1;
+    }
     yylex();
     print_symbol_table();
     return 0;
 }
+
 
 int yywrap(){
     return 1;
