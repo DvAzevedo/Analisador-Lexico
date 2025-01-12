@@ -4,6 +4,8 @@ ID[a-zA-Z][a-zA-Z0-9]*
 WHITESPACE[ ]
 quebra[\n]
 TAB[\t]
+str\"([^"\\]|\\.)*\"
+
 
 %{
     #define YY_DECL extern "C" int yylex()
@@ -12,6 +14,44 @@ TAB[\t]
     using namespace std;
     FILE *out ;
 	int linha;
+
+    typedef struct {
+        char name[50];
+        int id;
+        int line;
+    } Symbol;
+
+    Symbol symbol_table[100];
+    int symbol_count = 0;
+
+    void add_to_symbol_table(const char *name, int line) {
+        for (int i = 0; i < symbol_count; i++) {
+            if (strcmp(symbol_table[i].name, name) == 0) {
+                return;
+            }
+        }
+        strcpy(symbol_table[symbol_count].name, name);
+        symbol_table[symbol_count].line = line;
+        symbol_table[symbol_count].id = symbol_count;
+
+        symbol_count++;
+    }
+    int getId (const char *name){
+        for (int i = 0; i < symbol_count; i++) {
+            if (strcmp(symbol_table[i].name, name) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void print_symbol_table() {
+        printf("\nSymbol Table:\n");
+        printf("--------------\n");
+        for (int i = 0; i < symbol_count; i++) {
+            printf("Name: %s, Id: %d\n", symbol_table[i].name, symbol_table[i].id);
+        }
+    }
 %}
 %option yylineno
 %x COMMENT
@@ -38,8 +78,11 @@ else|if|int|return|void|while {fprintf(out,"<%s>\n" ,yytext);}
 
 {digit}+{ID}+ {fprintf(out,"<%d,ERROR,\"%s\">\n",yylineno,yytext); return 0;}
 
-{ID}+ {fprintf(out,"<ID,%s>\n",yytext);}
-
+{ID}+ {
+        add_to_symbol_table(yytext, yylineno);
+        fprintf(out,"<ID,%d>\n",getId(yytext));
+        }
+{str}+ {fprintf(out, "<str,%s>\n", yytext);}
 . {fprintf(out,"<%d,ERROR,\"%s\">\n" ,yylineno ,yytext); return 0;}
 
 %%
@@ -55,6 +98,7 @@ int main(int argc, char *argv[]){
     yyin = arquivo;
     out = fopen(argv[2],"w");
     yylex();
+    print_symbol_table();
     return 0;
 }
 
