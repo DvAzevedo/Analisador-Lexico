@@ -65,6 +65,9 @@ str\"([^"\\]|\\.)*\"
 
 {quebra}
 
+"//".* { /* Ignora comentários de linha única */ }
+
+
 "/*" { linha=yylineno; BEGIN(COMMENT); }
 
 <COMMENT>"*/" { BEGIN(INITIAL); }
@@ -73,12 +76,14 @@ str\"([^"\\]|\\.)*\"
 
 <COMMENT><<EOF>> {fprintf(out,"(%d,ERROR,\"/*\")\n",linha); return 0;}
 
-else|if|int|return|void|while {fprintf(out,"<%s>\n" ,yytext);} 
+float|else|if|int|return|void|while {fprintf(out,"<%s>\n" ,yytext);} 
 
 "+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"=="|"!="|"="|";"|","|"("|")"|"["|"]"|"{"|"}" {fprintf(out,"<%s>\n" ,yytext);}
 
 {WHITESPACE}+|{quebra}|{TAB}+
  
+{digit}+("."{digit}+) { fprintf(out, "<%s>\n", yytext);}
+
 {digit}+ {fprintf(out,"<%s>\n",yytext);}
 
 {digit}+{ID}+ {fprintf(out,"<%d,ERROR,\"%s\">\n",yylineno,yytext); return 0;}
