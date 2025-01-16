@@ -82,9 +82,9 @@ float|else|if|int|return|void|while {fprintf(out,"<%s>\n" ,yytext);}
 
 {WHITESPACE}+|{quebra}|{TAB}+
  
-{digit}+("."{digit}+) { fprintf(out, "<%s>\n", yytext);}
+{digit}+("."{digit}+) { fprintf(out, "<digitf, %s>\n", yytext);}
 
-{digit}+ {fprintf(out,"<%s>\n",yytext);}
+{digit}+ {fprintf(out,"<digit, %s>\n",yytext);}
 
 {digit}+{ID}+ {fprintf(out,"<%d,ERROR,\"%s\">\n",yylineno,yytext); return 0;}
 
